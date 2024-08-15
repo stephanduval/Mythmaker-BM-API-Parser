@@ -1,5 +1,7 @@
 import sqlite3
 import json
+import os  # Ensure os is imported to use os.listdir and other OS-related functions
+
 
 def create_database_and_tables(db_name):
     # Connect to the SQLite database
@@ -541,8 +543,195 @@ def insert_initial_data(cursor):
             VALUES (?, ?)
         ''', (heritage['Heritage_Name'], heritage['Description']))
 
+
+field_acronyms = {
+    "Card_Name": "CRD",
+    "Card_Class": "CLS",
+    "Card_Text": "TXT",
+    "Card_Power": "PWR",
+    "Creature_attack": "ATK",
+    "Creature_defense": "DEF",
+    "Instant_level_delta": "ILD",
+    "Instant_XP_delta": "IXP",
+    "Instant_AttackModifier_delta": "ISAM",
+    "Instant_ArmorClass_delta": "ISAC",
+    "Instant_Perception_delta": "ISPR",
+    "Instant_Intelligence_delta": "ISIN",
+    "Instant_Wisdom_delta": "ISWS",
+    "Instant_Charisma_delta": "ISCH",
+    "Instant_Constitution_delta": "ISCO",
+    "Instant_Dexterity_delta": "ISDX",
+    "Instant_Strength_delta": "ISST",
+    "Instant_Health_delta": "ISHL",
+    "Item_level_delta": "ILD",
+    "Item_XP_delta": "IXP",
+    "Item_AttackModifier_delta": "ITAM",
+    "Item_ArmorClass_delta": "ITAC",
+    "Item_Perception_delta": "ITR",
+    "Item_Intelligence_delta": "ITIN",
+    "Item_Wisdom_delta": "ITWS",
+    "Item_Charisma_delta": "ITCH",
+    "Item_Constitution_delta": "ITCO",
+    "Item_Dexterity_delta": "ITDX",
+    "Item_Strength_delta": "ITST",
+    "Item_Health_delta": "ITHL",
+    "Spell_level_delta": "SLD",
+    "Spell_XP_delta": "SXP",
+    "Spell_AttackModifier_delta": "SAM",
+    "Spell_ArmorClass_delta": "SAC",
+    "Spell_Perception_delta": "SPR",
+    "Spell_Intelligence_delta": "SIN",
+    "Spell_Wisdom_delta": "SWS",
+    "Spell_Charisma_delta": "SCH",
+    "Spell_Constitution_delta": "SCO",
+    "Spell_Dexterity_delta": "SDX",
+    "Spell_Strength_delta": "SST",
+    "Spell_Health_delta": "SHL",
+    "Quest_level_delta": "QLD",
+    "Quest_XP_delta": "QXP",
+    "Quest_AttackModifier_delta": "QAM",
+    "Quest_ArmorClass_delta": "QAC",
+    "Quest_Perception_delta": "QPR",
+    "Quest_Intelligence_delta": "QIN",
+    "Quest_Wisdom_delta": "QWS",
+    "Quest_Charisma_delta": "QCH",
+    "Quest_Constitution_delta": "QCO",
+    "Quest_Dexterity_delta": "QDX",
+    "Quest_Strength_delta": "QST",
+    "Quest_Health_delta": "QHL",
+    "QuestionText": "QST",
+    "YesTrait": "YTR",
+    "YesTraitDelta": "YTD",
+    "NoTrait": "NTR",
+    "NoTraitDelta": "NTD",
+    "Value": "VAL",
+    "Image_FileName": "IMG"
+}
+
+
+def insert_card(cursor, card_data):
+    cursor.execute('''
+        INSERT INTO Card (
+            Card_Name, Card_Class, Card_Text, Card_Power, Creature_attack, Creature_defense,
+            Instant_level_delta, Instant_XP_delta, Instant_AttackModifier_delta, Instant_ArmorClass_delta,
+            Instant_Perception_delta, Instant_Intelligence_delta, Instant_Wisdom_delta, Instant_Charisma_delta,
+            Instant_Constitution_delta, Instant_Dexterity_delta, Instant_Strength_delta, Instant_Health_delta,
+            Item_level_delta, Item_XP_delta, Item_AttackModifier_delta, Item_ArmorClass_delta,
+            Item_Perception_delta, Item_Intelligence_delta, Item_Wisdom_delta, Item_Charisma_delta,
+            Item_Constitution_delta, Item_Dexterity_delta, Item_Strength_delta, Item_Health_delta,
+            Spell_level_delta, Spell_XP_delta, Spell_AttackModifier_delta, Spell_ArmorClass_delta,
+            Spell_Perception_delta, Spell_Intelligence_delta, Spell_Wisdom_delta, Spell_Charisma_delta,
+            Spell_Constitution_delta, Spell_Dexterity_delta, Spell_Strength_delta, Spell_Health_delta,
+            Quest_level_delta, Quest_XP_delta, Quest_AttackModifier_delta, Quest_ArmorClass_delta,
+            Quest_Perception_delta, Quest_Intelligence_delta, Quest_Wisdom_delta, Quest_Charisma_delta,
+            Quest_Constitution_delta, Quest_Dexterity_delta, Quest_Strength_delta, Quest_Health_delta,
+            QuestionText, YesTrait, YesTraitDelta, NoTrait, NoTraitDelta, Value, Image_FileName
+        ) VALUES (
+            :Card_Name, :Card_Class, :Card_Text, :Card_Power, :Creature_attack, :Creature_defense,
+            :Instant_level_delta, :Instant_XP_delta, :Instant_AttackModifier_delta, :Instant_ArmorClass_delta,
+            :Instant_Perception_delta, :Instant_Intelligence_delta, :Instant_Wisdom_delta, :Instant_Charisma_delta,
+            :Instant_Constitution_delta, :Instant_Dexterity_delta, :Instant_Strength_delta, :Instant_Health_delta,
+            :Item_level_delta, :Item_XP_delta, :Item_AttackModifier_delta, :Item_ArmorClass_delta,
+            :Item_Perception_delta, :Item_Intelligence_delta, :Item_Wisdom_delta, :Item_Charisma_delta,
+            :Item_Constitution_delta, :Item_Dexterity_delta, :Item_Strength_delta, :Item_Health_delta,
+            :Spell_level_delta, :Spell_XP_delta, :Spell_AttackModifier_delta, :Spell_ArmorClass_delta,
+            :Spell_Perception_delta, :Spell_Intelligence_delta, :Spell_Wisdom_delta, :Spell_Charisma_delta,
+            :Spell_Constitution_delta, :Spell_Dexterity_delta, :Spell_Strength_delta, :Spell_Health_delta,
+            :Quest_level_delta, :Quest_XP_delta, :Quest_AttackModifier_delta, :Quest_ArmorClass_delta,
+            :Quest_Perception_delta, :Quest_Intelligence_delta, :Quest_Wisdom_delta, :Quest_Charisma_delta,
+            :Quest_Constitution_delta, :Quest_Dexterity_delta, :Quest_Strength_delta, :Quest_Health_delta,
+            :QuestionText, :YesTrait, :YesTraitDelta, :NoTrait, :NoTraitDelta, :Value, :Image_FileName
+        )
+    ''', card_data)
+
+def process_files_and_add_cards(folder_path, cursor):
+    for file_name in os.listdir(folder_path):
+        if file_name.endswith((".jpg", ".jpeg", ".png")):
+            parts = file_name.split("-")
+            if len(parts) > 3 and parts[0] == "MM":
+                card_name = parts[2].replace('_', ' ')
+                card_data = {
+                    "Card_Name": card_name,
+                    "Card_Class": None,
+                    "Card_Text": None,
+                    "Card_Power": None,
+                    "Creature_attack": None,
+                    "Creature_defense": None,
+                    "Instant_level_delta": None,
+                    "Instant_XP_delta": None,
+                    "Instant_AttackModifier_delta": None,
+                    "Instant_ArmorClass_delta": None,
+                    "Instant_Perception_delta": None,
+                    "Instant_Intelligence_delta": None,
+                    "Instant_Wisdom_delta": None,
+                    "Instant_Charisma_delta": None,
+                    "Instant_Constitution_delta": None,
+                    "Instant_Dexterity_delta": None,
+                    "Instant_Strength_delta": None,
+                    "Instant_Health_delta": None,
+                    "Item_level_delta": None,
+                    "Item_XP_delta": None,
+                    "Item_AttackModifier_delta": None,
+                    "Item_ArmorClass_delta": None,
+                    "Item_Perception_delta": None,
+                    "Item_Intelligence_delta": None,
+                    "Item_Wisdom_delta": None,
+                    "Item_Charisma_delta": None,
+                    "Item_Constitution_delta": None,
+                    "Item_Dexterity_delta": None,
+                    "Item_Strength_delta": None,
+                    "Item_Health_delta": None,
+                    "Spell_level_delta": None,
+                    "Spell_XP_delta": None,
+                    "Spell_AttackModifier_delta": None,
+                    "Spell_ArmorClass_delta": None,
+                    "Spell_Perception_delta": None,
+                    "Spell_Intelligence_delta": None,
+                    "Spell_Wisdom_delta": None,
+                    "Spell_Charisma_delta": None,
+                    "Spell_Constitution_delta": None,
+                    "Spell_Dexterity_delta": None,
+                    "Spell_Strength_delta": None,
+                    "Spell_Health_delta": None,
+                    "Quest_level_delta": None,
+                    "Quest_XP_delta": None,
+                    "Quest_AttackModifier_delta": None,
+                    "Quest_ArmorClass_delta": None,
+                    "Quest_Perception_delta": None,
+                    "Quest_Intelligence_delta": None,
+                    "Quest_Wisdom_delta": None,
+                    "Quest_Charisma_delta": None,
+                    "Quest_Constitution_delta": None,
+                    "Quest_Dexterity_delta": None,
+                    "Quest_Strength_delta": None,
+                    "Quest_Health_delta": None,
+                    "QuestionText": None,
+                    "YesTrait": None,
+                    "YesTraitDelta": None,
+                    "NoTrait": None,
+                    "NoTraitDelta": None,
+                    "Value": None,
+                    "Image_FileName": file_name
+                }
+
+                # Process the remaining parts for attributes and values until "END" is found
+                for i in range(3, len(parts) - 1, 2):
+                    if parts[i] == "END":
+                        break  # Stop parsing if "END" is encountered
+
+                    acronym = parts[i]
+                    if i + 1 < len(parts):  # Ensure there's a value after the acronym
+                        value = int(parts[i + 1]) if parts[i + 1].isdigit() else None
+                        field_name = next((key for key, val in field_acronyms.items() if val == acronym), None)
+                        if field_name:
+                            card_data[field_name] = value
+
+                insert_card(cursor, card_data)
+                print(f"Added card: {card_name} from file {file_name}")
+
+
 def main():
-    db_name = 'mythmaker_game.db'
+    db_name = 'myDatabase.db'
     connection, cursor = create_database_and_tables(db_name)
 
     # Load BurnEvents data
@@ -556,6 +745,11 @@ def main():
 
     # Insert initial data for PlayerClass and Player_Heritage
     insert_initial_data(cursor)
+
+
+    folder_path = '/home/elcid/Documents/Unity Projects/The Mythmaker Quest/Assets/Images/XRImages/Cards'
+    
+    process_files_and_add_cards(folder_path, cursor)
 
     connection.commit()
     connection.close()
