@@ -731,7 +731,7 @@ def process_files_and_add_cards(folder_path, cursor):
 
 
 def main():
-    db_name = 'myDatabase.db'
+    db_name = 'myDatabaseSeeder.db'
     connection, cursor = create_database_and_tables(db_name)
 
     # Load BurnEvents data
